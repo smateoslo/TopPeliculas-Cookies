@@ -57,26 +57,49 @@
            } 
        } 
     }
+
+    //metodo para mostrar los datos
+    public function mostrar_tabla(){
+        $nombres_=explode(",",$_COOKIE["nombre_pelicula"]);
+        $isans_=explode(",",$_COOKIE["isan_pelicula"]);
+        $años_=explode(",",$_COOKIE["ano_pelicula"]);
+        $puntuaciones_=explode(",",$_COOKIE["puntuacion_pelicula"]);
+
+        for($i=0;$i<count($nombres_);$i++){
+            if($nombres_[$i]!=""){
+                $datos.="Nombre: ".$nombres_[$i]." ISAN: ".$isans_[$i]." Anio: ".$años_[$i]." Puntuacion: ".$puntuaciones_[$i]."<br>";
+            }
+        }
+        echo $datos;
+    }
+
+
 }
 ?>
 
-        <?php
+    <?php
 
-            //Pongo unos valores por defecto si no se anade nda ("Ejemplo",1111,2022,2)
-            $concatenado = new TopPeliculas();
-            setcookie("nombre_pelicula","Ejemlo",time()+3600);
-            setcookie("isan_pelicula",1111,time()+3600);
-            setcookie("ano_pelicula",2022,time()+3600);
-            setcookie("puntuacion_pelicula",2,time()+3600);
-            echo "<br>";
+        $concatenado = new TopPeliculas();
+        setcookie("nombre_pelicula","",time()+3600);
+        setcookie("isan_pelicula","",time()+3600);
+        setcookie("ano_pelicula","",time()+3600);
+        setcookie("puntuacion_pelicula","",time()+3600);
+        echo "<br>";
 
-        ?>
+    ?>
 
+    <?php
+    //cookie usuario
+    if(isset($_POST['usuario'])){
+        $usuario = $_POST['usuario'];
+        setcookie('usuario',$usuario,time()+3600);
+    }
+    ?>
     
-
+<h1>Usuario: <?php {echo $_COOKIE["usuario"] ; } ?></h1>
 
 <form action="TopPeliculas.php" method="post">
-    <h1>Ejercicio Cookies</h1>
+    <h2>Ejercicio Cookies</h2>
         <p>Nombre de la pelicula: </p> 
         <input type="text" name="Nombre" value="<?php if(isset($_POST['Nombre'])){echo $_POST['Nombre'];}else{echo "";} ?>">
         <p>ISAN: </p>
@@ -96,28 +119,93 @@
         <br><br>
         <button type="submit">Añadir</button>
         <br><br>
-    </form>
+    
     <?php
-        if(isset($_POST["Nombre"])){
-            $nombres=$_COOKIE["nombre_pelicula"].",".$_POST["Nombre"];
-            $isans=$_COOKIE["isan_pelicula"].",".$_POST["Isan"];
-            $años=$_COOKIE["ano_pelicula"].",".$_POST["año"];
-            $puntuaciones=$_COOKIE["puntuacion_pelicula"].",".$_POST["combo"];
-            setcookie("nombre_pelicula",$nombres,time()+3600);
-            setcookie("isan_pelicula",$isans,time()+3600);
-            setcookie("ano_pelicula",$años,time()+3600);
-            setcookie("puntuacion_pelicula",$puntuaciones,time()+3600);
+            if(isset($_POST["Isan"]) && isset($_POST["Nombre"]) && isset($_POST["año"]) && isset($_POST["combo"])){
+            if($_POST["Isan"]!="" && $_POST["Nombre"]!=""){
+                $posicion=0;
+                $encontrado=false;
+                $isans=explode(",",$_COOKIE["isan_pelicula"]);
+                for ($i=0; $i < count($isans); $i++) { 
+                    if($isans[$i]==$_POST["Isan"]){
+                        $encontrado=true;
+                        $posicion=$i;
+                    }
+                }
+                if($encontrado){
+                    $nombres=explode(",",$_COOKIE["nombre_pelicula"]);
+                    $años=explode(",",$_COOKIE["ano_pelicula"]);
+                    $puntuaciones=explode(",",$_COOKIE["puntuacion_pelicula"]);
+                    $años[$posicion]=$_POST["año"];
+                    $puntuaciones[$posicion]=$_POST["combo"];
+                    $nombres[$posicion]=$_POST["Nombre"];
+                    $isans[$posicion]=$_POST["Isan"];
+
+                    for ($i=0; $i < count($nombres); $i++) { 
+                        $nombres_corregido.=$nombres[$i].",";
+                        $isans_corregido.=$isans[$i].",";
+                        $puntuaciones_corregido.=$puntuaciones[$i].",";
+                        $años_corregido.=$años[$i].",";
+                    }
+                    setcookie("nombre_pelicula",$nombres_corregido,time()+3600);
+                    setcookie("isan_pelicula",$isans_corregido,time()+3600);
+                    setcookie("ano_pelicula",$años_corregido,time()+3600);
+                    setcookie("puntuacion_pelicula",$puntuaciones_corregido,time()+3600);
+
+                }else{
+                    $nombres=$_COOKIE["nombre_pelicula"].$_POST["Nombre"].",";
+                    $isans=$_COOKIE["isan_pelicula"].$_POST["Isan"].",";
+                    $años=$_COOKIE["ano_pelicula"].$_POST["año"].",";
+                    $puntuaciones=$_COOKIE["puntuacion_pelicula"].$_POST["combo"].",";
+                    setcookie("nombre_pelicula",$nombres,time()+3600);
+                    setcookie("isan_pelicula",$isans,time()+3600);
+                    setcookie("ano_pelicula",$años,time()+3600);
+                    setcookie("puntuacion_pelicula",$puntuaciones,time()+3600);
+                }
+
+            }else if($_POST["Isan"]!="" && $_POST["Nombre"]==""){
+                $isans=explode(",",$_COOKIE["isan_pelicula"]);
+                for ($i=0; $i < count($isans); $i++) { 
+                    if($isans[$i]==$_POST["Isan"]){
+                        $posicion=$i;
+                    }
+                }
+
+                $nombres=explode(",",$_COOKIE["nombre_pelicula"]);
+                $años=explode(",",$_COOKIE["ano_pelicula"]);
+                $puntuaciones=explode(",",$_COOKIE["puntuacion_pelicula"]);
+                
+                for ($i=0; $i < count($nombres); $i++) { 
+                    if($i!=$posicion){
+                        $nombres_corregido.=$nombres[$i].",";
+                        $años_corregido.=$años[$i].",";
+                        $puntuaciones_corregido.=$puntuaciones[$i].",";
+                        $isans_corregido.=$isans[$i].",";
+                    }  
+                }
+
+                setcookie("nombre_pelicula",$nombres_corregido,time()+3600);
+                setcookie("isan_pelicula",$isans_corregido,time()+3600);
+                setcookie("ano_pelicula",$años_corregido,time()+3600);
+                setcookie("puntuacion_pelicula",$puntuaciones_corregido,time()+3600);
+
+            }else if($_POST["Isan"]=="" && $_POST["Nombre"]!=""){
+                $nombres=explode(",",$_COOKIE["nombre_pelicula"]);
+                $años=explode(",",$_COOKIE["ano_pelicula"]);
+                for ($i=0; $i < count($nombres); $i++) { 
+                    if(str_contains($nombres[$i],$_POST["Nombre"])){
+                        echo "<p>".$nombres[$i]." from ".$años[$i]."</p>";
+                    }
+                }
+            }
 
 
-            $peli=new Pelicula(htmlentities($_POST['Isan']),htmlentities($_POST['Nombre']),htmlentities($_POST['combo']),htmlentities($_POST['año']));
-            $concatenado->anadirPelicula($peli);
-            echo $_COOKIE["nombre_pelicula"]."<br>";
-            echo $_COOKIE["isan_pelicula"]."<br>";
-            echo $_COOKIE["ano_pelicula"]."<br>";
-            echo $_COOKIE["puntuacion_pelicula"]."<br>";
-        
             
+            $pelicula=new Pelicula(htmlentities($_POST['Isan']),htmlentities($_POST['Nombre']),htmlentities($_POST['combo']),htmlentities($_POST['año']));
+            $concatenado->anadirPelicula($pelicula);
+            $concatenado->mostrar_tabla();
         }
-        ?>
+    ?>
+</form>
 </body>
 </html>
